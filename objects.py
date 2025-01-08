@@ -1,20 +1,39 @@
 # define classes for game objects
-
+import sdl2
 from psychopy import visual, event, core
 import random 
+import numpy as np
 
 # Player (Pacman)
 class Player:
-    def __init__(self, win, joystick, keyboard):
+    def __init__(self, win, joystick, keyboard, max_speed=10):
         self.shape = visual.Circle(win, radius=20, fillColor="yellow", lineColor="yellow")
         self.x, self.y = 0, 0 # Initial position
         self.joystick = joystick
+        self.win = win
         self.kb = keyboard
+        self.max_speed = max_speed
 
     def move(self):
         if self.joystick:
-            x_axis = self.joystick.getX() * 10 # Scale joystick movement as needed
-            y_axis = self.joystick.getY() * 10
+            # joystick is on scale of [-32000, 32000]
+            sdl2.SDL_JoystickUpdate()
+            x_axis = sdl2.SDL_JoystickGetAxis(self.joystick, 0)  # X-axis
+            y_axis = -sdl2.SDL_JoystickGetAxis(self.joystick, 1)  # Y-axis
+            print(x_axis, y_axis)
+
+            # introduce stabilizer - 0 values less than abs(3000)
+            x_axis = x_axis if abs(x_axis) > 8000 else 0
+            y_axis = y_axis if abs(y_axis) > 8000 else 0
+
+            # rescale values to have max speed of player
+            scale_factor = 32000 / self.max_speed
+            x_axis /= scale_factor
+            y_axis /= scale_factor
+
+            print(x_axis, y_axis)
+
+            # set position
             self.x += x_axis
             self.y += y_axis
             self.shape.pos = (self.x, self.y)
@@ -34,23 +53,29 @@ class Player:
 
 # Target Squares
 class Target:
-    def __init__(self, win, color, start_pos):
+    def __init__(self, win, color, start_pos, speed):
         self.shape = visual.Rect(win, width=30, height=30, fillColor=color, lineColor=color)
         self.shape.pos = start_pos
-        self.speed = random.choice([2, -2]), random.choice([2, -2])
+        self.speed = speed
+        self.win = win
+        self.prev_positions = []
 
-    def move(self):
-        x, y = self.shape.pos
-        dx, dy = self.speed
-        x += dx
-        y += dy
+    def move(self, move_calculator, player_pos, other_npcs):
+        self_x, self_y = self.shape.pos[0] + self.win.clientSize[0] // 2, self.shape.pos[1] + self.win.clientSize[1] // 2
+        self_apos = np.array([self_x, self_y])
+        self.prev_positions.append(self_apos)
+        if len(self.prev_positions) > 10:
+            self.prev_positions.pop(0)
 
-        # Bounce off walls
-        if abs(x) > 400 or abs(y) > 300:
-            dx *= -1
-            dy *= -1
-        self.speed = dx, dy
-        self.shape.pos = (x, y)
+        # calculate movement vec
+        movement_vec = move_calculator.calculate_next_move(
+            self_apos, player_pos, other_npcs, self.prev_positions
+        )
+        pos_vec = tuple(self.speed * movement_vec +  self_apos)
+
+        # readjust position
+        self_npos_x, self_npos_y = pos_vec[0] - self.win.clientSize[0] // 2, pos_vec[1] - self.win.clientSize[1] // 2
+        self.shape.pos = (self_npos_x, self_npos_y)
 
     def check_collision(self, player):
         return self.shape.overlaps(player.shape)
