@@ -23,14 +23,14 @@ def title_screen(win):
             pos=(0, -250), height=20, 
             color="white"
         ),
-        "speed_slider": visual.Slider(
+         "speed_input": visual.TextBox2(
             win, 
-            ticks=[0, 2.5, 5, 7.5, 10],
-            labels=["0", "2.5", "5", "7.5", "10"],
-            pos=(0, 175),
-            granularity=0,
-            style="slider",
-            size=(300, 20)
+            text="5", 
+            editable=True,
+            pos=(0, 175), 
+            size=(150, 50),
+            color="white",
+            borderColor="white"
         ),
         "speed_label": visual.TextStim(
             win, 
@@ -55,36 +55,37 @@ def title_screen(win):
             height=20, 
             color="white"
         ),
-        "spread_label": visual.TextStim(
+        "spread_label_1": visual.TextStim(
             win, 
-            text="Trial Type Distribution:",
-            pos=(0, 25),
-            height=20,
-            color="white"
-        ),
-        "spread_slider": visual.Slider(
-            win,
-            ticks=[0, 25, 50, 75, 100],
-            #labels=["0%", "25%", "50%", "75%", "100%"],
-            pos=(0, 0),
-            granularity=0,
-            style="slider",
-            size=(300, 20)
-        ),
-        "spread_text_left": visual.TextStim(
-            win,
-            text="Single-Prey",
+            text="Trial Type Distribution",
             pos=(-300, 0),
             height=20,
             color="white"
         ),
-        "spread_text_right": visual.TextStim(
-            win,
-            text="Multi-Prey",
-            pos=(300, 0),
+        "spread_label_2": visual.TextStim(
+            win, 
+            text="0 = 100% single prey",
+            pos=(200, 20),
             height=20,
             color="white"
         ),
+         "spread_label_3": visual.TextStim(
+            win, 
+            text="100 = 100% multi prey",
+            pos=(200, -20),
+            height=20,
+            color="white"
+        ),
+         "spread_input": visual.TextBox2(
+            win, 
+            text="50", 
+            editable=True,
+            pos=(0, 0), 
+            size=(150, 50),
+            color="white",
+            borderColor="white"
+        ),
+        
         "prey_label": visual.TextStim(
             win, 
             text="Prey Options:",
@@ -94,7 +95,7 @@ def title_screen(win):
         ),
         "prey_slider": visual.Slider(
             win,
-            ticks=[3, 5],
+            ticks=[0, 1],
             labels=["3", "5"],
             pos=(0, -75),
             granularity=1,
@@ -151,10 +152,10 @@ def title_screen(win):
         # check mouse cl
         # if start button clicked
         if mouse.isPressedIn(components["start_button"]):
-            params["speed"] = components["speed_slider"].markerPos
+            params["speed"] = int(components["speed_input"].text)
             params["trials"] = int(components["trials_input"].text)
-            params["trial_type_distribution"] = components["spread_slider"].markerPos
-            params["target_count"] = components["prey_slider"].markerPos
+            params["trial_type_distribution"] = int(components["spread_input"].text)
+            params["target_count"] = 3 if components["prey_slider"].markerPos == 0 else 5
             params["allow_dupes"] = bool(components["dupe_slider"].markerPos)
             win.clearBuffer()
             print(params)
