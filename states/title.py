@@ -39,6 +39,13 @@ def title_screen(win):
             height=20, 
             color="white",
         ),
+          "speed_label_2": visual.TextStim(
+            win, 
+            text="NOTE: player max speed = 10",
+            pos=(225, 175),
+            height=20,
+            color="white"
+        ),
         "trials_input": visual.TextBox2(
             win, 
             text="10", 

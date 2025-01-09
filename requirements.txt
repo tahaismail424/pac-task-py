@@ -1,0 +1,4 @@
+pandas
+numpy
+sdl2
+psychopy
