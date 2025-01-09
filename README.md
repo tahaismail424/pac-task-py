@@ -12,6 +12,7 @@ All required dependencies must be installed for the application to work. This ca
 pip install -r pac-task-py/requirements.txt
 ```
 **NOTE: The application will not run if a joystick is not connected to the computer**
+
 there is an optional flag that can be added to the execution script
 ```{bash}
 python pac-task-py/main.py --output-dir=OUTPUT_DIR
