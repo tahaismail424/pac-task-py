@@ -1,6 +1,7 @@
 import numpy as np
 
 class MoveCalculator:
+    """This class contains all movement logic for prey objects"""
     def __init__(
             self, screen_width, screen_height,
             wall_thickness, cost_weights

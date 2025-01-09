@@ -20,7 +20,6 @@ class Player:
             sdl2.SDL_JoystickUpdate()
             x_axis = sdl2.SDL_JoystickGetAxis(self.joystick, 0)  # X-axis
             y_axis = -sdl2.SDL_JoystickGetAxis(self.joystick, 1)  # Y-axis
-            print(x_axis, y_axis)
 
             # introduce stabilizer - 0 values less than abs(3000)
             x_axis = x_axis if abs(x_axis) > 8000 else 0
@@ -30,8 +29,6 @@ class Player:
             scale_factor = 32000 / self.max_speed
             x_axis /= scale_factor
             y_axis /= scale_factor
-
-            print(x_axis, y_axis)
 
             # set position
             self.x += x_axis
@@ -57,6 +54,7 @@ class Target:
         self.shape = visual.Rect(win, width=30, height=30, fillColor=color, lineColor=color)
         self.shape.pos = start_pos
         self.speed = speed
+        self.color_name = color
         self.win = win
         self.prev_positions = []
 
@@ -73,8 +71,14 @@ class Target:
         )
         pos_vec = tuple(self.speed * movement_vec +  self_apos)
 
-        # readjust position
-        self_npos_x, self_npos_y = pos_vec[0] - self.win.clientSize[0] // 2, pos_vec[1] - self.win.clientSize[1] // 2
+        # readjust position to be within bounds
+        pos_vec_x_adj = min(self.win.clientSize[0], max(0, pos_vec[0]))
+        pos_vec_y_adj = min(self.win.clientSize[1], max(0, pos_vec[1]))
+
+        # readjust position to psychopy axis
+        self_npos_x, self_npos_y = pos_vec_x_adj - self.win.clientSize[0] // 2, pos_vec_y_adj - self.win.clientSize[1] // 2
+
+        # set position
         self.shape.pos = (self_npos_x, self_npos_y)
 
     def check_collision(self, player):
